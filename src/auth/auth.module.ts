@@ -10,6 +10,8 @@ import { UserService } from '../user/service/user/user.service';
 import { UserModule } from '../user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserEntity } from '../user/entity/user.entity';
+import { LocalStrategy } from './local.strategy';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
@@ -35,7 +37,7 @@ import { UserEntity } from '../user/entity/user.entity';
         from: '"Sakola" <verify@sakola.com>',
       },
       template: {
-        dir: join(__dirname, '../views/email-templates'),
+        dir: join(__dirname, '../src/views/email-templates'),
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,
@@ -43,7 +45,7 @@ import { UserEntity } from '../user/entity/user.entity';
       },
     }),
   ],
-  providers: [AuthService, UserService],
+  providers: [AuthService, UserService, LocalStrategy, JwtStrategy],
   controllers: [AuthController],
 })
 export class AuthModule {}

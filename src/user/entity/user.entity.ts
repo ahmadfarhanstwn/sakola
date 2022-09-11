@@ -1,14 +1,17 @@
+import { ClassMembersEntity } from 'src/class_members/entity/class_members.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
-@Entity()
+@Entity('user')
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
+  @OneToMany(() => ClassMembersEntity, (classMembers) => classMembers.user_id)
   id: number;
 
   @Column({
@@ -35,6 +38,11 @@ export class UserEntity {
     nullable: true,
   })
   is_verified: boolean;
+
+  @Column({
+    nullable: true,
+  })
+  photo_profile: string;
 
   @CreateDateColumn()
   created_at: Date;

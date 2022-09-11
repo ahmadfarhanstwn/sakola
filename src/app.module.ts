@@ -8,6 +8,12 @@ import { AuthService } from './auth/service/auth/auth.service';
 import { UserService } from './user/service/user/user.service';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { ClassroomModule } from './classroom/classroom.module';
+import { ClassMembersModule } from './class_members/class_members.module';
+import { WaitingApprovalModule } from './waiting_approval/waiting_approval.module';
+import { ClassroomEntity } from './classroom/entity/classroom.entity';
+import { ClassMembersEntity } from './class_members/entity/class_members.entity';
+import { WaitingApprovalEntity } from './waiting_approval/entity/waiting_approval.entity';
 
 @Module({
   imports: [
@@ -24,15 +30,28 @@ import { JwtModule } from '@nestjs/jwt';
         username: 'postgres',
         password: process.env.DB_PASSWORD,
         database: 'sakola',
-        entities: [UserEntity],
+        entities: [
+          UserEntity,
+          ClassroomEntity,
+          ClassMembersEntity,
+          WaitingApprovalEntity,
+        ],
         synchronize: true,
       }),
     }),
-    TypeOrmModule.forFeature([UserEntity]),
+    TypeOrmModule.forFeature([
+      UserEntity,
+      ClassroomEntity,
+      ClassMembersEntity,
+      WaitingApprovalEntity,
+    ]),
     AuthModule,
     ConfigModule.forRoot({
       envFilePath: '.env',
     }),
+    ClassroomModule,
+    ClassMembersModule,
+    WaitingApprovalModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UserService],
