@@ -42,13 +42,6 @@ export class ClassroomService {
 
   async joinClassroom(userId: number, classroomId: number): Promise<any> {
     try {
-      /*
-        logic :
-        - find classroom,
-        - check classroom.join_approval
-        - if classroom.join_approval is true, insert user and classroom to waiting_approval table
-        - else add user to class_members table
-      */
       const classroom = await this.dataSource
         .getRepository(ClassroomEntity)
         .createQueryBuilder('classroom')
@@ -97,54 +90,100 @@ export class ClassroomService {
     }
   }
 
-  //NOT SURE, SHOULD I PUT THIS CODE HERE OR IN WAITING APPROVAL SERVICE
-  async approveWaiting(classroomId: number, userId: number): Promise<any> {
-    /*
-      logic :
-      - find waiting approval by classroom id
-      - add user id and classroom id to class_members table
-      - delete data from waiting approval table
-    */
+  async IsTeacher(userId: number, classroomId: number) {
+    const isTeacher = await this.dataSource
+      .getRepository(ClassMembersEntity)
+      .createQueryBuilder('class_members')
+      .where('class_members.classroom_id = :classroom_id', {
+        classroom_id: classroomId,
+      })
+      .andWhere('class_members.user_id = :user_id', { user_id: userId })
+      .getOne();
+    return isTeacher ? true : false;
+  }
+
+  async acceptJoin(
+    classroomId: number,
+    joiningUserId: number,
+    userId: number,
+  ): Promise<any> {
     try {
+      const isTeacher = this.IsTeacher(userId, classroomId);
+      if (!isTeacher)
+        return new HttpException(
+          'Forbidden! You are unable to accept!',
+          HttpStatus.FORBIDDEN,
+        );
       const classMembersBody = {
         role: ClassMemberRoleEnum.Student,
         classroom_id: classroomId,
-        user_id: userId,
+        user_id: joiningUserId,
       };
       await this.classMembersRepository.insert(classMembersBody);
       await this.dataSource
         .createQueryBuilder()
         .update(ClassroomEntity)
+        .where('id = :id', { id: classroomId })
         .set({ members_count: () => 'members_count + 1' })
         .execute();
-      await this.waitingApprovalRepository.delete({
-        classroom_id: classroomId,
-        user_id: userId,
-      });
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(WaitingApprovalEntity)
+        .where('classroom_id = :classroom_id', { classroom_id: classroomId })
+        .andWhere('user_id = :user_id', { user_id: joiningUserId })
+        .execute();
       return true;
     } catch (error) {
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async rejectJoin(classroomId: number, userId: number): Promise<any> {
+  async rejectJoin(
+    classroomId: number,
+    joiningUserId: number,
+    userId: number,
+  ): Promise<any> {
     try {
-      await this.waitingApprovalRepository.delete({
-        classroom_id: classroomId,
-        user_id: userId,
-      });
+      const isTeacher = this.IsTeacher(userId, classroomId);
+      if (!isTeacher)
+        return new HttpException(
+          'Forbidden! You are unable to accept!',
+          HttpStatus.FORBIDDEN,
+        );
+
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(WaitingApprovalEntity)
+        .where('classroom_id = :classroom_id', { classroom_id: classroomId })
+        .andWhere('user_id = :user_id', { user_id: joiningUserId })
+        .execute();
       return true;
     } catch (error) {
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
     }
   }
 
-  async getWaitingApprovals(classroomId: number): Promise<any> {
+  async getWaitingApprovals(classroomId: number, userId: number): Promise<any> {
     try {
+      const isTeacher = this.IsTeacher(userId, classroomId);
+      if (!isTeacher)
+        return new HttpException(
+          'Forbidden! You are unable to accept!',
+          HttpStatus.FORBIDDEN,
+        );
+
       return await this.dataSource
         .getRepository(WaitingApprovalEntity)
         .createQueryBuilder('waiting_approval')
-        .select(['waiting_approval.user_id', 'waiting_approval.joined_date'])
+        .leftJoin('waiting_approval.user_id', 'user')
+        .select([
+          'waiting_approval.joined_date',
+          'user.id',
+          'user.full_name',
+          'user.photo_profile',
+        ])
         .where('waiting_approval.classroom_id = :id', { id: classroomId })
         .getMany();
     } catch (error) {
@@ -152,7 +191,65 @@ export class ClassroomService {
     }
   }
 
-  //async kickMember()
+  async removeMember(
+    classroomId: number,
+    memberUserId: number,
+    userId: number,
+  ): Promise<any> {
+    try {
+      const isTeacher = this.IsTeacher(userId, classroomId);
+      if (!isTeacher)
+        return new HttpException(
+          'Forbidden! You are unable to accept!',
+          HttpStatus.FORBIDDEN,
+        );
 
-  //async deleteClassroom()
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(ClassMembersEntity)
+        .where('classroom_id = :classroom_id', { classroom_id: classroomId })
+        .andWhere('user_id = :user_id', { user_id: memberUserId })
+        .execute();
+
+      await this.dataSource
+        .createQueryBuilder()
+        .update(ClassroomEntity)
+        .set({ members_count: () => 'members_count - 1' })
+        .execute();
+
+      return true;
+    } catch (error) {
+      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
+
+  async deleteClassroom(classroomId: number, userId: number): Promise<any> {
+    try {
+      const isTeacher = this.IsTeacher(userId, classroomId);
+      if (!isTeacher)
+        return new HttpException(
+          'Forbidden! You are unable to accept!',
+          HttpStatus.FORBIDDEN,
+        );
+
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(ClassMembersEntity)
+        .where('classroom_id = :classroom_id', { classroom_id: classroomId })
+        .execute();
+
+      await this.dataSource
+        .createQueryBuilder()
+        .delete()
+        .from(ClassroomEntity)
+        .where('id = :classroom_id', { classroom_id: classroomId })
+        .execute();
+
+      return true;
+    } catch (error) {
+      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+  }
 }

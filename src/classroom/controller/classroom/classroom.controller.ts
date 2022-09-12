@@ -15,7 +15,6 @@ export class ClassroomController {
   @UseGuards(AuthGuard('jwt'))
   @Post('join')
   async joinClassroom(@Req() req) {
-    // console.log(req.user.id);
     return await this.classroomService.joinClassroom(
       req.user.id,
       req.body.classroom_id,
@@ -23,17 +22,51 @@ export class ClassroomController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('approve')
-  async approveWaiting(@Req() req) {
-    return await this.classroomService.approveWaiting(
+  @Post('accept')
+  async acceptWaiting(@Req() req) {
+    return await this.classroomService.acceptJoin(
       req.body.classroom_id,
       req.body.user_id,
+      req.user.id,
     );
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Post('reject')
+  async rejectWaiting(@Req() req) {
+    return await this.classroomService.rejectJoin(
+      req.body.classroom_id,
+      req.body.user_id,
+      req.user.id,
+    );
+  }
+
+  // TODO : Finds out why this function doesn't return user_id
+  @UseGuards(AuthGuard('jwt'))
   @Get('waiting/:id')
-  async getWaitingList(@Param() param) {
-    return await this.classroomService.getWaitingApprovals(param.id);
+  async getWaitingList(@Param() param, @Req() req) {
+    return await this.classroomService.getWaitingApprovals(
+      param.id,
+      req.user.id,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('remove-member')
+  async removeMember(@Req() req) {
+    return await this.classroomService.removeMember(
+      req.body.classroom_id,
+      req.body.user_id,
+      req.user.id,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('delete')
+  async deleteClassroom(@Req() req) {
+    return await this.classroomService.deleteClassroom(
+      req.body.classroom_id,
+      req.user.id,
+    );
   }
 }
