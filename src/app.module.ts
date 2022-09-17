@@ -14,6 +14,8 @@ import { WaitingApprovalModule } from './waiting_approval/waiting_approval.modul
 import { ClassroomEntity } from './classroom/entity/classroom.entity';
 import { ClassMembersEntity } from './class_members/entity/class_members.entity';
 import { WaitingApprovalEntity } from './waiting_approval/entity/waiting_approval.entity';
+import { PostsModule } from './posts/posts.module';
+import { PostCommentsModule } from './post_comments/post_comments.module';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { WaitingApprovalEntity } from './waiting_approval/entity/waiting_approva
     ClassroomModule,
     ClassMembersModule,
     WaitingApprovalModule,
+    PostsModule,
+    PostCommentsModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UserService],

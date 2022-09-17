@@ -1,4 +1,6 @@
 import { ClassMembersEntity } from 'src/class_members/entity/class_members.entity';
+import { PostsEntity } from 'src/posts/entity/posts.entity';
+import { PostCommentsEntity } from 'src/post_comments/entity/post_comments.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -12,6 +14,8 @@ import {
 export class UserEntity {
   @PrimaryGeneratedColumn('uuid')
   @OneToMany(() => ClassMembersEntity, (classMembers) => classMembers.user_id)
+  @OneToMany(() => PostsEntity, (posts) => posts.user_id)
+  @OneToMany(() => PostCommentsEntity, (post_comments) => post_comments.user_id)
   id: number;
 
   @Column({

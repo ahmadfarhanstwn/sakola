@@ -1,4 +1,5 @@
 import { ClassMembersEntity } from 'src/class_members/entity/class_members.entity';
+import { PostsEntity } from 'src/posts/entity/posts.entity';
 import {
   Column,
   CreateDateColumn,
@@ -21,6 +22,7 @@ export class ClassroomEntity {
     () => ClassMembersEntity,
     (classMembers) => classMembers.classroom_id,
   )
+  @OneToMany(() => PostsEntity, (posts) => posts.classroom_id)
   id: number;
 
   @Column({
