@@ -52,7 +52,7 @@ export class ClassroomController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('remove-member')
+  @Post('remove-member')
   async removeMember(@Req() req) {
     return await this.classroomService.removeMember(
       req.body.classroom_id,
@@ -62,10 +62,19 @@ export class ClassroomController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('delete')
+  @Post('delete')
   async deleteClassroom(@Req() req) {
     return await this.classroomService.deleteClassroom(
       req.body.classroom_id,
+      req.user.id,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('get_members/:classroom_id')
+  async getClassroomMembers(@Param() param, @Req() req) {
+    return await this.classroomService.getClassroomMembers(
+      param.classroom_id,
       req.user.id,
     );
   }
