@@ -16,6 +16,8 @@ import { ClassMembersEntity } from './class_members/entity/class_members.entity'
 import { WaitingApprovalEntity } from './waiting_approval/entity/waiting_approval.entity';
 import { PostsModule } from './posts/posts.module';
 import { PostCommentsModule } from './post_comments/post_comments.module';
+import { PostsEntity } from './posts/entity/posts.entity';
+import { PostCommentsEntity } from './post_comments/entity/post_comments.entity';
 
 @Module({
   imports: [
@@ -37,6 +39,8 @@ import { PostCommentsModule } from './post_comments/post_comments.module';
           ClassroomEntity,
           ClassMembersEntity,
           WaitingApprovalEntity,
+          PostsEntity,
+          PostCommentsEntity,
         ],
         synchronize: true,
       }),
@@ -46,6 +50,8 @@ import { PostCommentsModule } from './post_comments/post_comments.module';
       ClassroomEntity,
       ClassMembersEntity,
       WaitingApprovalEntity,
+      PostsEntity,
+      PostCommentsEntity,
     ]),
     AuthModule,
     ConfigModule.forRoot({

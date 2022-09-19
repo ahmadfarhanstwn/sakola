@@ -8,7 +8,7 @@ import {
 import { DataSource, Repository } from 'typeorm';
 import { WaitingApprovalEntity } from '../../../waiting_approval/entity/waiting_approval.entity';
 
-// TODO : IMPLEMENTING DATABASE TRANSACTION ???
+// TODO : REFACTOR THE SERVICE, SO IT'S NOT RETURNING HTTP EXCEPTION
 
 @Injectable()
 export class ClassroomService {
@@ -26,17 +26,39 @@ export class ClassroomService {
     classroom: ClassroomEntity,
     userId: number,
   ): Promise<any> {
+    const queryRunner = this.dataSource.createQueryRunner();
     try {
-      const newClassroom = await this.classroomRepository.save(classroom);
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      const newClassroom = await this.dataSource
+        .createQueryBuilder(queryRunner)
+        .insert()
+        .into(ClassroomEntity)
+        .values(classroom)
+        .returning('*')
+        .execute();
+
       const classMembersBody = {
         role: ClassMemberRoleEnum.Teacher,
-        classroom_id: newClassroom.id,
+        classroom_id: newClassroom.raw[0].id,
         user_id: userId,
       };
-      await this.classMembersRepository.insert(classMembersBody);
-      return newClassroom;
+      await this.dataSource
+        .createQueryBuilder(queryRunner)
+        .insert()
+        .into(ClassMembersEntity)
+        .values(classMembersBody)
+        .execute();
+
+      await queryRunner.commitTransaction();
+      return newClassroom.raw[0];
     } catch (error) {
+      if (queryRunner.isTransactionActive)
+        await queryRunner.rollbackTransaction();
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -103,6 +125,8 @@ export class ClassroomService {
       if (queryRunner.isTransactionActive)
         await queryRunner.rollbackTransaction();
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -126,7 +150,7 @@ export class ClassroomService {
   ): Promise<any> {
     const queryRunner = await this.dataSource.createQueryRunner();
     try {
-      const isTeacher = this.IsTeacher(userId, classroomId);
+      const isTeacher = await this.IsTeacher(userId, classroomId);
       if (!isTeacher)
         return new HttpException(
           'Forbidden! You are unable to accept!',
@@ -168,6 +192,8 @@ export class ClassroomService {
       if (queryRunner.isTransactionActive)
         await queryRunner.rollbackTransaction();
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      await queryRunner.release();
     }
   }
 
@@ -176,51 +202,43 @@ export class ClassroomService {
     joiningUserId: number,
     userId: number,
   ): Promise<any> {
-    try {
-      const isTeacher = this.IsTeacher(userId, classroomId);
-      if (!isTeacher)
-        return new HttpException(
-          'Forbidden! You are unable to accept!',
-          HttpStatus.FORBIDDEN,
-        );
+    const isTeacher = await this.IsTeacher(userId, classroomId);
+    if (!isTeacher)
+      return new HttpException(
+        'Forbidden! You are unable to reject!',
+        HttpStatus.FORBIDDEN,
+      );
 
-      await this.dataSource
-        .createQueryBuilder()
-        .delete()
-        .from(WaitingApprovalEntity)
-        .where('classroom_id = :classroom_id', { classroom_id: classroomId })
-        .andWhere('user_id = :user_id', { user_id: joiningUserId })
-        .execute();
-      return true;
-    } catch (error) {
-      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    await this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(WaitingApprovalEntity)
+      .where('classroom_id = :classroom_id', { classroom_id: classroomId })
+      .andWhere('user_id = :user_id', { user_id: joiningUserId })
+      .execute();
+    return true;
   }
 
   async getWaitingApprovals(classroomId: number, userId: number): Promise<any> {
-    try {
-      const isTeacher = await this.IsTeacher(userId, classroomId);
-      if (!isTeacher)
-        return new HttpException(
-          'Forbidden! You are unable to accept!',
-          HttpStatus.FORBIDDEN,
-        );
+    const isTeacher = await this.IsTeacher(userId, classroomId);
+    if (!isTeacher)
+      return new HttpException(
+        'Forbidden! You are unable to get waiting approvals list!',
+        HttpStatus.FORBIDDEN,
+      );
 
-      return await this.dataSource
-        .getRepository(WaitingApprovalEntity)
-        .createQueryBuilder('waiting_approval')
-        .leftJoin('waiting_approval.user_id', 'user')
-        .select([
-          'waiting_approval.joined_date',
-          'user.id',
-          'user.full_name',
-          'user.photo_profile',
-        ])
-        .where('waiting_approval.classroom_id = :id', { id: classroomId })
-        .getMany();
-    } catch (error) {
-      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return await this.dataSource
+      .getRepository(WaitingApprovalEntity)
+      .createQueryBuilder('waiting_approval')
+      .leftJoin('waiting_approval.user_id', 'user')
+      .select([
+        'waiting_approval.joined_date',
+        'user.id',
+        'user.full_name',
+        'user.photo_profile',
+      ])
+      .where('waiting_approval.classroom_id = :id', { id: classroomId })
+      .getMany();
   }
 
   async removeMember(
@@ -230,7 +248,7 @@ export class ClassroomService {
   ): Promise<any> {
     const queryRunner = await this.dataSource.createQueryRunner();
     try {
-      const isTeacher = this.IsTeacher(userId, classroomId);
+      const isTeacher = await this.IsTeacher(userId, classroomId);
       if (!isTeacher)
         return new HttpException(
           'Forbidden! You are unable to accept!',
@@ -259,13 +277,15 @@ export class ClassroomService {
     } catch (error) {
       if (queryRunner.isTransactionActive) queryRunner.rollbackTransaction();
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      await queryRunner.release();
     }
   }
 
   async deleteClassroom(classroomId: number, userId: number): Promise<any> {
     const queryRunner = await this.dataSource.createQueryRunner();
     try {
-      const isTeacher = this.IsTeacher(userId, classroomId);
+      const isTeacher = await this.IsTeacher(userId, classroomId);
       if (!isTeacher)
         return new HttpException(
           'Forbidden! You are unable to accept!',
@@ -293,10 +313,12 @@ export class ClassroomService {
     } catch (error) {
       if (queryRunner.isTransactionActive) queryRunner.rollbackTransaction();
       return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
+    } finally {
+      await queryRunner.release();
     }
   }
 
-  async isJoined(userId: number, classroomId: number): Promise<any> {
+  async isJoined(userId: number, classroomId: number): Promise<boolean> {
     const user = await this.dataSource
       .getRepository(ClassMembersEntity)
       .createQueryBuilder('class_members')
@@ -309,28 +331,24 @@ export class ClassroomService {
   }
 
   async getClassroomMembers(classroomId: number, userId: number): Promise<any> {
-    try {
-      const is_joined = this.isJoined(userId, classroomId);
-      if (!is_joined)
-        return new HttpException(
-          'You are not the member of this classroom',
-          HttpStatus.UNAUTHORIZED,
-        );
+    const is_joined = await this.isJoined(userId, classroomId);
+    if (!is_joined)
+      return new HttpException(
+        'You are not the member of this classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
 
-      return await this.dataSource
-        .getRepository(ClassMembersEntity)
-        .createQueryBuilder('classroom_members')
-        .innerJoin('classroom_members.user_id', 'user')
-        .select([
-          'classroom_members.role',
-          'user.id',
-          'user.full_name',
-          'user.photo_profile',
-        ])
-        .where('classroom_members.classroom_id = :id', { id: classroomId })
-        .getMany();
-    } catch (error) {
-      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    return await this.dataSource
+      .getRepository(ClassMembersEntity)
+      .createQueryBuilder('classroom_members')
+      .innerJoin('classroom_members.user_id', 'user')
+      .select([
+        'classroom_members.role',
+        'user.id',
+        'user.full_name',
+        'user.photo_profile',
+      ])
+      .where('classroom_members.classroom_id = :id', { id: classroomId })
+      .getMany();
   }
 }

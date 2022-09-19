@@ -32,100 +32,110 @@ export class PostsService {
     title: string,
     body: string,
   ): Promise<any> {
-    try {
-      const user = await this.isUserJoined(userId, classroomId);
-      if (!user)
-        return new HttpException(
-          'You are unable to create a post in this classroom',
-          HttpStatus.UNAUTHORIZED,
-        );
+    const user = await this.isUserJoined(userId, classroomId);
+    if (!user)
+      return new HttpException(
+        'You are unable to create a post in this classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
 
-      const classroom = await this.dataSource
-        .getRepository(ClassroomEntity)
-        .createQueryBuilder('classroom')
-        .where('classroom.id = :id', { id: classroomId })
-        .getOne();
-      if (
-        classroom.post_setting != PostSetting.AllPostComment &&
-        user.role != ClassMemberRoleEnum.Teacher
-      )
-        return new HttpException(
-          'Teacher Only! You are unable to post!',
-          HttpStatus.UNAUTHORIZED,
-        );
+    const classroom = await this.dataSource
+      .getRepository(ClassroomEntity)
+      .createQueryBuilder('classroom')
+      .where('classroom.id = :id', { id: classroomId })
+      .getOne();
+    if (
+      classroom.post_setting != PostSetting.AllPostComment &&
+      user.role != ClassMemberRoleEnum.Teacher
+    )
+      return new HttpException(
+        'Teacher Only! You are unable to post!',
+        HttpStatus.UNAUTHORIZED,
+      );
 
-      const createPostBody = {
-        title: title,
-        body: body,
-        classroom_id: classroomId,
-        user_id: userId,
-      };
-      return await this.dataSource
-        .createQueryBuilder()
-        .insert()
-        .into(PostsEntity)
-        .values(createPostBody)
-        .returning('*')
-        .execute();
-    } catch (error) {
-      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const createPostBody = {
+      title: title,
+      body: body,
+      classroom_id: classroomId,
+      user_id: userId,
+    };
+    return await this.dataSource
+      .createQueryBuilder()
+      .insert()
+      .into(PostsEntity)
+      .values(createPostBody)
+      .returning('*')
+      .execute()[0];
   }
 
   async getPosts(classroomId: number, userId: number): Promise<any> {
-    try {
-      const user = await this.isUserJoined(userId, classroomId);
-      if (!user)
-        new HttpException(
-          'You are unable to get posts from this classroom',
-          HttpStatus.UNAUTHORIZED,
-        );
-      return await this.dataSource
-        .getRepository(PostsEntity)
-        .createQueryBuilder('posts')
-        .leftJoin('posts.user_id', 'user')
-        .select([
-          'posts.title',
-          'posts.body',
-          'posts.created_at',
-          'posts.updated_at',
-          'user.full_name',
-          'user.photo_profile',
-        ])
-        .where('posts.classroom_id = :id', { id: classroomId })
-        .getMany();
-    } catch (error) {
-      return new HttpException(error, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+    const user = await this.isUserJoined(userId, classroomId);
+    if (!user)
+      new HttpException(
+        'You are unable to get posts from this classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    return await this.dataSource
+      .getRepository(PostsEntity)
+      .createQueryBuilder('posts')
+      .leftJoin('posts.user_id', 'user')
+      .select([
+        'posts.title',
+        'posts.body',
+        'posts.created_at',
+        'posts.updated_at',
+        'user.full_name',
+        'user.photo_profile',
+      ])
+      .where('posts.classroom_id = :id', { id: classroomId })
+      .getMany();
   }
 
-  async getPost(classroomId: number, userId: number, postId: number) {
-    try {
-      const user = await this.isUserJoined(userId, classroomId);
-      if (!user)
-        return new HttpException(
-          'You are unable to get post from this classroom',
-          HttpStatus.UNAUTHORIZED,
-        );
+  async getPost(
+    classroomId: number,
+    userId: number,
+    postId: number,
+  ): Promise<any> {
+    const user = await this.isUserJoined(userId, classroomId);
+    if (!user)
+      return new HttpException(
+        'You are unable to get post from this classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
 
-      return await this.dataSource
-        .getRepository(PostsEntity)
-        .createQueryBuilder('posts')
-        .leftJoin('posts.user_id', 'user')
-        .select([
-          'posts.title',
-          'posts.body',
-          'posts.created_at',
-          'posts.updated_at',
-          'user.full_name',
-          'user.photo_profile',
-        ])
-        .where('posts.id = :id', { id: postId })
-        .getMany();
-    } catch (error) {}
+    return await this.dataSource
+      .getRepository(PostsEntity)
+      .createQueryBuilder('posts')
+      .leftJoin('posts.user_id', 'user')
+      .select([
+        'posts.title',
+        'posts.body',
+        'posts.created_at',
+        'posts.updated_at',
+        'user.full_name',
+        'user.photo_profile',
+      ])
+      .where('posts.id = :id', { id: postId })
+      .getMany();
   }
 
-  //async updatePost(){}
+  //TODO
+  async updatePost(classroomId: number, userId: number, postId: number) {
+    const user = await this.isUserJoined(userId, classroomId);
+    if (!user)
+      return new HttpException(
+        'You are unable to update post from this classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    const post = await this.dataSource
+      .getRepository(PostsEntity)
+      .createQueryBuilder('posts')
+      .where('posts.id = :id', { id: postId })
+      .getOne();
+    // if ()
+  }
 
   //async deletePost(){}
 }
