@@ -7,23 +7,18 @@ import {
 } from '../../../class_members/entity/class_members.entity';
 import { DataSource, Repository } from 'typeorm';
 import { WaitingApprovalEntity } from '../../../waiting_approval/entity/waiting_approval.entity';
-
-// TODO : REFACTOR THE SERVICE, SO IT'S NOT RETURNING HTTP EXCEPTION
+import { createClassroomDto } from '../../dto/classroom.dto';
 
 @Injectable()
 export class ClassroomService {
   constructor(
-    @InjectRepository(ClassroomEntity)
-    private classroomRepository: Repository<ClassroomEntity>,
-    @InjectRepository(ClassMembersEntity)
-    private classMembersRepository: Repository<ClassMembersEntity>,
     @InjectRepository(WaitingApprovalEntity)
     private waitingApprovalRepository: Repository<WaitingApprovalEntity>,
     private dataSource: DataSource,
   ) {}
 
   async createClassroom(
-    classroom: ClassroomEntity,
+    classroom: createClassroomDto,
     userId: number,
   ): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();

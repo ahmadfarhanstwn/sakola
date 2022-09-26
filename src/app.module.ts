@@ -18,6 +18,8 @@ import { PostsModule } from './posts/posts.module';
 import { PostCommentsModule } from './post_comments/post_comments.module';
 import { PostsEntity } from './posts/entity/posts.entity';
 import { PostCommentsEntity } from './post_comments/entity/post_comments.entity';
+import { ChatMessageClassroomModule } from './chat_message_classroom/chat_message_classroom.module';
+import { chatMessageClassroomEntity } from './chat_message_classroom/entity/chat_message_classroom.entity';
 
 @Module({
   imports: [
@@ -41,6 +43,7 @@ import { PostCommentsEntity } from './post_comments/entity/post_comments.entity'
           WaitingApprovalEntity,
           PostsEntity,
           PostCommentsEntity,
+          chatMessageClassroomEntity,
         ],
         synchronize: true,
       }),
@@ -62,6 +65,7 @@ import { PostCommentsEntity } from './post_comments/entity/post_comments.entity'
     WaitingApprovalModule,
     PostsModule,
     PostCommentsModule,
+    ChatMessageClassroomModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, UserService],

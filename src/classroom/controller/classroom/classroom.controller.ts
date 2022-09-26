@@ -1,6 +1,19 @@
-import { Controller, Post, Req, UseGuards, Get, Param } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  UseGuards,
+  Get,
+  Param,
+  Body,
+  Delete,
+} from '@nestjs/common';
 import { ClassroomService } from '../../service/classroom/classroom.service';
 import { AuthGuard } from '@nestjs/passport';
+import {
+  acceptRejectJoinDto,
+  createClassroomDto,
+} from '../../dto/classroom.dto';
 
 @Controller('classroom')
 export class ClassroomController {
@@ -8,8 +21,8 @@ export class ClassroomController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('create')
-  async createClassroom(@Req() req) {
-    return await this.classroomService.createClassroom(req.body, req.user.id);
+  async createClassroom(@Req() req, @Body() inputDto: createClassroomDto) {
+    return await this.classroomService.createClassroom(inputDto, req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -23,25 +36,24 @@ export class ClassroomController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('accept')
-  async acceptWaiting(@Req() req) {
+  async acceptWaiting(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.acceptJoin(
-      req.body.classroom_id,
-      req.body.user_id,
+      inputDto.classroom_id,
+      inputDto.joining_user_id,
       req.user.id,
     );
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Post('reject')
-  async rejectWaiting(@Req() req) {
+  async rejectWaiting(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.rejectJoin(
-      req.body.classroom_id,
-      req.body.user_id,
+      inputDto.classroom_id,
+      inputDto.joining_user_id,
       req.user.id,
     );
   }
 
-  // TODO : Finds out why this function doesn't return user_id
   @UseGuards(AuthGuard('jwt'))
   @Get('waiting/:id')
   async getWaitingList(@Param() param, @Req() req) {
@@ -52,20 +64,20 @@ export class ClassroomController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('remove-member')
-  async removeMember(@Req() req) {
+  @Delete('remove-member')
+  async removeMember(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.removeMember(
-      req.body.classroom_id,
-      req.body.user_id,
+      inputDto.classroom_id,
+      inputDto.joining_user_id,
       req.user.id,
     );
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post('delete')
-  async deleteClassroom(@Req() req) {
+  @Delete('/:classroom_id')
+  async deleteClassroom(@Req() req, @Param() param) {
     return await this.classroomService.deleteClassroom(
-      req.body.classroom_id,
+      param.classroom_id,
       req.user.id,
     );
   }

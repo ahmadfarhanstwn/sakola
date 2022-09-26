@@ -1,3 +1,4 @@
+import { chatMessageClassroomEntity } from 'src/chat_message_classroom/entity/chat_message_classroom.entity';
 import { ClassroomEntity } from 'src/classroom/entity/classroom.entity';
 import { PostCommentsEntity } from 'src/post_comments/entity/post_comments.entity';
 import { UserEntity } from 'src/user/entity/user.entity';
@@ -17,6 +18,10 @@ import {
 export class PostsEntity {
   @PrimaryGeneratedColumn('uuid')
   @OneToMany(() => PostCommentsEntity, (post_comments) => post_comments.post_id)
+  @OneToMany(
+    () => chatMessageClassroomEntity,
+    (chat_message) => chat_message.classroom_id,
+  )
   id: number;
 
   @Column({

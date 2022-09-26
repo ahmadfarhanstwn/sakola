@@ -7,8 +7,8 @@ import { DataSource } from 'typeorm';
 import {
   ClassroomEntity,
   PostSetting,
-} from 'src/classroom/entity/classroom.entity';
-import { PostsEntity } from 'src/posts/entity/posts.entity';
+} from '../../../classroom/entity/classroom.entity';
+import { PostsEntity } from '../../entity/posts.entity';
 
 @Injectable()
 export class PostsService {
@@ -89,6 +89,7 @@ export class PostsService {
         'user.photo_profile',
       ])
       .where('posts.classroom_id = :id', { id: classroomId })
+      .orderBy('posts.created_at', 'DESC')
       .getMany();
   }
 
@@ -109,33 +110,74 @@ export class PostsService {
       .createQueryBuilder('posts')
       .leftJoin('posts.user_id', 'user')
       .select([
-        'posts.title',
-        'posts.body',
-        'posts.created_at',
-        'posts.updated_at',
-        'user.full_name',
-        'user.photo_profile',
+        'posts.title AS title',
+        'posts.body AS body',
+        'posts.user_id AS user_id',
+        'posts.created_at AS created_at',
+        'posts.updated_at AS updated_at',
+        'user.full_name AS full_name',
+        'user.photo_profile AS photo_profile',
       ])
       .where('posts.id = :id', { id: postId })
-      .getMany();
+      .getOne();
   }
 
-  //TODO
-  async updatePost(classroomId: number, userId: number, postId: number) {
+  async updatePost(
+    classroomId: number,
+    userId: number,
+    postId: number,
+    title: string,
+    body: string,
+  ): Promise<any> {
     const user = await this.isUserJoined(userId, classroomId);
     if (!user)
       return new HttpException(
-        'You are unable to update post from this classroom',
+        'You are unable to update a post from this classroom',
         HttpStatus.UNAUTHORIZED,
       );
 
-    const post = await this.dataSource
+    const post = await this.getPost(classroomId, userId, postId);
+    if (post.user_id != userId)
+      return new HttpException(
+        "You are unable to update other's post",
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    return await this.dataSource
       .getRepository(PostsEntity)
       .createQueryBuilder('posts')
-      .where('posts.id = :id', { id: postId })
-      .getOne();
-    // if ()
+      .update()
+      .set({ title: title, body: body })
+      .where('id = :id', { id: postId })
+      .returning('*')
+      .execute()[0];
   }
 
-  //async deletePost(){}
+  async deletePost(
+    classroomId: number,
+    userId: number,
+    postId: number,
+  ): Promise<any> {
+    const user = await this.isUserJoined(userId, classroomId);
+    if (!user)
+      return new HttpException(
+        'You are unable to delete a post from this classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    const post = await this.getPost(classroomId, userId, postId);
+    if (post.user_id != userId)
+      return new HttpException(
+        "You are unable to delete other's post",
+        HttpStatus.UNAUTHORIZED,
+      );
+
+    await this.dataSource
+      .createQueryBuilder()
+      .delete()
+      .from(PostsEntity)
+      .where('id = :id', { id: postId })
+      .execute();
+    return true;
+  }
 }
