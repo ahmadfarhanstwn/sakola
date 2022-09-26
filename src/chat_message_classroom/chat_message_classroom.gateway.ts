@@ -31,6 +31,6 @@ export class ChatMessageClassrooomGateway {
   @SubscribeMessage('deleteMessage')
   async handleDeleteMessage(client: any, payload: chatMessageClassroomEntity) {
     await this.chatMessageClassroomService.deleteMessage(payload);
-    this.server.emit('deleteMessage', payload);
+    this.server.emit('recMessage', payload);
   }
 }
