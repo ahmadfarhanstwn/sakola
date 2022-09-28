@@ -1,7 +1,7 @@
-import { chatMessageClassroomEntity } from 'src/chat_message_classroom/entity/chat_message_classroom.entity';
-import { ClassroomEntity } from 'src/classroom/entity/classroom.entity';
-import { PostCommentsEntity } from 'src/post_comments/entity/post_comments.entity';
-import { UserEntity } from 'src/user/entity/user.entity';
+import { chatMessageClassroomEntity } from '../../chat_message_classroom/entity/chat_message_classroom.entity';
+import { ClassroomEntity } from '../../classroom/entity/classroom.entity';
+import { PostCommentsEntity } from '../../post_comments/entity/post_comments.entity';
+import { UserEntity } from '../../user/entity/user.entity';
 import {
   Column,
   CreateDateColumn,

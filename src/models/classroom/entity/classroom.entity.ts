@@ -1,5 +1,5 @@
-import { ClassMembersEntity } from 'src/class_members/entity/class_members.entity';
-import { PostsEntity } from 'src/posts/entity/posts.entity';
+import { ClassMembersEntity } from '../../class_members/entity/class_members.entity';
+import { PostsEntity } from '../../posts/entity/posts.entity';
 import {
   Column,
   CreateDateColumn,

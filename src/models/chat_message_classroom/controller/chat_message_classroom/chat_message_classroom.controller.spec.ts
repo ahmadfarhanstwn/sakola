@@ -9,7 +9,9 @@ describe('ChatMessageClassroomController', () => {
       controllers: [ChatMessageClassroomController],
     }).compile();
 
-    controller = module.get<ChatMessageClassroomController>(ChatMessageClassroomController);
+    controller = module.get<ChatMessageClassroomController>(
+      ChatMessageClassroomController,
+    );
   });
 
   it('should be defined', () => {

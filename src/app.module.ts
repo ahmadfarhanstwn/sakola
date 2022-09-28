@@ -1,25 +1,25 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserModule } from './user/user.module';
+import { UserModule } from './models/user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { UserEntity } from './user/entity/user.entity';
+import { UserEntity } from './models/user/entity/user.entity';
 import { AuthController } from './auth/controller/auth/auth.controller';
 import { AuthService } from './auth/service/auth/auth.service';
-import { UserService } from './user/service/user/user.service';
+import { UserService } from './models/user/service/user/user.service';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
-import { ClassroomModule } from './classroom/classroom.module';
-import { ClassMembersModule } from './class_members/class_members.module';
-import { WaitingApprovalModule } from './waiting_approval/waiting_approval.module';
-import { ClassroomEntity } from './classroom/entity/classroom.entity';
-import { ClassMembersEntity } from './class_members/entity/class_members.entity';
-import { WaitingApprovalEntity } from './waiting_approval/entity/waiting_approval.entity';
-import { PostsModule } from './posts/posts.module';
-import { PostCommentsModule } from './post_comments/post_comments.module';
-import { PostsEntity } from './posts/entity/posts.entity';
-import { PostCommentsEntity } from './post_comments/entity/post_comments.entity';
-import { ChatMessageClassroomModule } from './chat_message_classroom/chat_message_classroom.module';
-import { chatMessageClassroomEntity } from './chat_message_classroom/entity/chat_message_classroom.entity';
+import { ClassroomModule } from './models/classroom/classroom.module';
+import { ClassMembersModule } from './models/class_members/class_members.module';
+import { WaitingApprovalModule } from './models/waiting_approval/waiting_approval.module';
+import { ClassroomEntity } from './models/classroom/entity/classroom.entity';
+import { ClassMembersEntity } from './models/class_members/entity/class_members.entity';
+import { WaitingApprovalEntity } from './models/waiting_approval/entity/waiting_approval.entity';
+import { PostsModule } from './models/posts/posts.module';
+import { PostCommentsModule } from './models/post_comments/post_comments.module';
+import { PostsEntity } from './models/posts/entity/posts.entity';
+import { PostCommentsEntity } from './models/post_comments/entity/post_comments.entity';
+import { ChatMessageClassroomModule } from './models/chat_message_classroom/chat_message_classroom.module';
+import { chatMessageClassroomEntity } from './models/chat_message_classroom/entity/chat_message_classroom.entity';
 
 @Module({
   imports: [

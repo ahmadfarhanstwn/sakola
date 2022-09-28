@@ -1,6 +1,6 @@
-import { ClassMembersEntity } from 'src/class_members/entity/class_members.entity';
-import { PostsEntity } from 'src/posts/entity/posts.entity';
-import { PostCommentsEntity } from 'src/post_comments/entity/post_comments.entity';
+import { ClassMembersEntity } from '../../class_members/entity/class_members.entity';
+import { PostsEntity } from '../../posts/entity/posts.entity';
+import { PostCommentsEntity } from '../../post_comments/entity/post_comments.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,

@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Req } from '@nestjs/common';
-import { ChatMessageClassroomService } from 'src/chat_message_classroom/service/chat_message_classroom/chat_message_classroom.service';
+import { ChatMessageClassroomService } from '../../service/chat_message_classroom/chat_message_classroom.service';
 
 @Controller('chat-message-classroom')
 export class ChatMessageClassroomController {

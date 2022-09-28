@@ -6,10 +6,10 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { AuthController } from './controller/auth/auth.controller';
-import { UserService } from '../user/service/user/user.service';
-import { UserModule } from '../user/user.module';
+import { UserService } from '../models/user/service/user/user.service';
+import { UserModule } from '../models/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserEntity } from '../user/entity/user.entity';
+import { UserEntity } from '../models/user/entity/user.entity';
 import { LocalStrategy } from './local.strategy';
 import { JwtStrategy } from './jwt.strategy';
 

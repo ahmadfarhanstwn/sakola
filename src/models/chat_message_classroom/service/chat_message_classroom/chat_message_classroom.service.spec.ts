@@ -9,7 +9,9 @@ describe('ChatMessageClassroomService', () => {
       providers: [ChatMessageClassroomService],
     }).compile();
 
-    service = module.get<ChatMessageClassroomService>(ChatMessageClassroomService);
+    service = module.get<ChatMessageClassroomService>(
+      ChatMessageClassroomService,
+    );
   });
 
   it('should be defined', () => {

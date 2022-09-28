@@ -10,7 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from '../../service/auth/auth.service';
-import { UserEntity } from '../../../user/entity/user.entity';
+import { UserEntity } from '../../../models/user/entity/user.entity';
 import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 
