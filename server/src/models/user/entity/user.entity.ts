@@ -9,6 +9,7 @@ import {
   UpdateDateColumn,
   OneToMany,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
 
 @Entity('user')
 export class UserEntity {
@@ -47,6 +48,12 @@ export class UserEntity {
     nullable: true,
   })
   photo_profile: string;
+
+  @Column({
+    nullable: true,
+  })
+  @Exclude()
+  currentHashedRefreshToken: string;
 
   @CreateDateColumn()
   created_at: Date;

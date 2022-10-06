@@ -45,6 +45,33 @@ export class AuthService {
     });
   }
 
+  async getCookieWithAccessToken(userId: number) {
+    const payload = { userId };
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '900s',
+    });
+    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=900s`;
+  }
+
+  async getCookieWithRefreshToken(userId: number) {
+    const payload = { userId };
+    const token = this.jwtService.sign(payload, {
+      secret: process.env.JWT_SECRET,
+      expiresIn: '7d',
+    });
+    const cookie = `Refresh=${token}; HttpOnly; Path=/; Max-Age=7d`;
+    return { cookie, token };
+  }
+
+  async setCurrentRefreshToken(refreshToken: string, userId: number) {
+    const currentHashedRefreshToken = await bcrypt.hash(refreshToken, 10);
+    await this.userRepository.update(
+      { id: userId },
+      { currentHashedRefreshToken },
+    );
+  }
+
   async signUp(user: UserEntity): Promise<any> {
     try {
       const salt = await bcrypt.genSalt();
@@ -69,13 +96,6 @@ export class AuthService {
     const isPasswordTrue = await bcrypt.compare(password, user.password);
     if (!isPasswordTrue || !user.is_verified) return null;
     return user;
-  }
-
-  async signIn(user: any): Promise<any> {
-    const payload = { sub: user.id };
-    return {
-      token: this.jwtService.sign(payload),
-    };
   }
 
   async getAccount(id: number): Promise<any> {
@@ -107,5 +127,28 @@ export class AuthService {
 
   async getUser(id: number): Promise<UserEntity> {
     return this.userRepository.findOne({ where: { id: id } });
+  }
+
+  async getUserIfRefreshTokenMatched(refreshToken: string, userId: number) {
+    const user = await this.getUser(userId);
+    const isRefreshTokenMatching = await bcrypt.compare(
+      refreshToken,
+      user.currentHashedRefreshToken,
+    );
+    if (isRefreshTokenMatching) return user;
+  }
+
+  async getCookiesForLogout() {
+    return [
+      'Authentication=; HttpOnly; Path=/; Max-Age=0',
+      'Refresh=; HttpOnly; Path=/; Max-Age=0',
+    ];
+  }
+
+  async removeRefreshToken(userId: number) {
+    return await this.userRepository.update(
+      { id: userId },
+      { currentHashedRefreshToken: null },
+    );
   }
 }
