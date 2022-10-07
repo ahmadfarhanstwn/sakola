@@ -29,13 +29,13 @@ export class PostsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/:classroom_id')
+  @Get(':classroom_id')
   async getPosts(@Param() param, @Req() req) {
     return await this.postService.getPosts(param.classroom_id, req.user.id);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/:classroom_id/:post_id')
+  @Get(':classroom_id/:post_id')
   async getPost(@Param() param, @Req() req) {
     return await this.postService.getPost(
       param.classroom_id,
@@ -45,7 +45,7 @@ export class PostsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch('/:classroom_id/:post_id')
+  @Patch(':classroom_id/:post_id')
   async updatePost(
     @Param() param,
     @Req() req,
@@ -61,7 +61,7 @@ export class PostsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete('/:classroom_id/:post_id')
+  @Delete(':classroom_id/:post_id')
   async deletePost(@Param() param, @Req() req) {
     return await this.postService.deletePost(
       param.classroom_id,

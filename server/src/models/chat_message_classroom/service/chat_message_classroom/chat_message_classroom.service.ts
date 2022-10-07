@@ -2,7 +2,7 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { chatMessageClassroomEntity } from '../../entity/chat_message_classroom.entity';
 import { PostsService } from '../../../posts/service/posts/posts.service';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { deleteMessageDto } from '../../dto/delete_message.dto';
 
 @Injectable()
@@ -11,6 +11,7 @@ export class ChatMessageClassroomService {
     @InjectRepository(chatMessageClassroomEntity)
     private chatRepository: Repository<chatMessageClassroomEntity>,
     private postService: PostsService,
+    private dataSource: DataSource,
   ) {}
 
   async createMessage(chat: chatMessageClassroomEntity): Promise<any> {
@@ -31,7 +32,11 @@ export class ChatMessageClassroomService {
         HttpStatus.UNAUTHORIZED,
       );
 
-    return await this.chatRepository.findBy({ classroom_id: classroom_id });
+    return await this.dataSource
+      .getRepository(chatMessageClassroomEntity)
+      .createQueryBuilder('chat')
+      .where('chat.classroom_id = :id', { id: classroom_id })
+      .orderBy('chat.created_at', 'ASC');
   }
 
   async deleteMessage(inputDto: deleteMessageDto): Promise<any> {

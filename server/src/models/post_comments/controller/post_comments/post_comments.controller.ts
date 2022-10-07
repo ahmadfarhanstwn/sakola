@@ -16,7 +16,7 @@ export class PostCommentsController {
   constructor(private readonly postCommentService: PostCommentsService) {}
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/comments/:post_id')
+  @Get(':post_id')
   async getPostComments(@Param() param) {
     return await this.postCommentService.getComments(param.post_id);
   }
@@ -32,13 +32,13 @@ export class PostCommentsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('/comment/:comment_id')
+  @Get('detail/:comment_id')
   async getComment(@Param() param) {
     return await this.postCommentService.getComment(param.comment_id);
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Patch('/:comment_id')
+  @Patch('detail/:comment_id')
   async editComment(@Param() param, @Req() req) {
     return await this.postCommentService.editComment(
       param.comment_id,
@@ -48,7 +48,7 @@ export class PostCommentsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Delete('/:comment_id')
+  @Delete('detail/:comment_id')
   async deleteComment(@Param() param, @Req() req) {
     return await this.postCommentService.deleteComment(
       param.comment_id,

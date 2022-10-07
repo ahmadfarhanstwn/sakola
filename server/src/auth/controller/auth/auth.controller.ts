@@ -25,13 +25,13 @@ export class AuthController {
     private jwtService: JwtService,
   ) {}
 
-  @Post('/signup')
+  @Post('signup')
   async signUp(@Body() user: UserEntity) {
     return await this.authService.signUp(user);
   }
 
   @UseGuards(AuthGuard('local'))
-  @Post('/signin')
+  @Post('signin')
   async signIn(@Request() request: RequestWithUser) {
     const { user } = request;
     const accessToken = await this.authService.getCookieWithAccessToken(
@@ -46,12 +46,12 @@ export class AuthController {
     return user;
   }
 
-  @Post('/verify')
+  @Post('verify-account')
   async verifyAccount(@Body() body) {
     return await this.authService.verifyAccount(body.code);
   }
 
-  @Get('/:id')
+  @Get(':id')
   async getOne(@Response() res, @Param() param) {
     const user = await this.authService.getUser(param.id);
     if (!user) return res.status(HttpStatus.NOT_FOUND).json({});
@@ -59,7 +59,7 @@ export class AuthController {
   }
 
   @UseGuards(JwtRefreshGuard)
-  @Get('/refresh')
+  @Get('refresh-token')
   async refresh(@Req() request: RequestWithUser) {
     const accessTokenCookie = await this.authService.getCookieWithAccessToken(
       request.user.id,
