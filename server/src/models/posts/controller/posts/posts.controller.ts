@@ -9,15 +9,15 @@ import {
   Delete,
   Body,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
 import { createPostDto, updatePostDto } from '../../dto/posts.dto';
 import { PostsService } from '../../../posts/service/posts/posts.service';
+import JwtRefreshGuard from '../../../../auth/jwt_refresh.guard';
 
 @Controller('posts')
 export class PostsController {
   constructor(private readonly postService: PostsService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Post('')
   async createPost(@Req() req, @Body() inputDto: createPostDto) {
     return await this.postService.createPost(
@@ -28,13 +28,13 @@ export class PostsController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Get(':classroom_id')
   async getPosts(@Param() param, @Req() req) {
     return await this.postService.getPosts(param.classroom_id, req.user.id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Get(':classroom_id/:post_id')
   async getPost(@Param() param, @Req() req) {
     return await this.postService.getPost(
@@ -44,7 +44,7 @@ export class PostsController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Patch(':classroom_id/:post_id')
   async updatePost(
     @Param() param,
@@ -60,7 +60,7 @@ export class PostsController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Delete(':classroom_id/:post_id')
   async deletePost(@Param() param, @Req() req) {
     return await this.postService.deletePost(

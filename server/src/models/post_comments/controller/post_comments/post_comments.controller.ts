@@ -8,20 +8,20 @@ import {
   Patch,
   Delete,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
+import JwtRefreshGuard from '../../../../auth/jwt_refresh.guard';
 import { PostCommentsService } from '../../service/post_comments/post_comments.service';
 
 @Controller('post-comments')
 export class PostCommentsController {
   constructor(private readonly postCommentService: PostCommentsService) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Get(':post_id')
   async getPostComments(@Param() param) {
     return await this.postCommentService.getComments(param.post_id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Post('')
   async createPostComment(@Req() req) {
     return await this.postCommentService.createPostComment(
@@ -31,13 +31,13 @@ export class PostCommentsController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Get('detail/:comment_id')
   async getComment(@Param() param) {
     return await this.postCommentService.getComment(param.comment_id);
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Patch('detail/:comment_id')
   async editComment(@Param() param, @Req() req) {
     return await this.postCommentService.editComment(
@@ -47,7 +47,7 @@ export class PostCommentsController {
     );
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtRefreshGuard)
   @Delete('detail/:comment_id')
   async deleteComment(@Param() param, @Req() req) {
     return await this.postCommentService.deleteComment(
