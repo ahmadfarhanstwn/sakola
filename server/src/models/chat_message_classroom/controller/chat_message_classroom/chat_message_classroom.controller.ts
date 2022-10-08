@@ -1,5 +1,5 @@
 import { Controller, Get, Param, Req, UseGuards } from '@nestjs/common';
-import JwtRefreshGuard from '../../../../auth/jwt_refresh.guard';
+import JwtGuard from '../../../../auth/jwt.guard';
 import { ChatMessageClassroomService } from '../../service/chat_message_classroom/chat_message_classroom.service';
 
 @Controller('chat-classroom')
@@ -8,7 +8,7 @@ export class ChatMessageClassroomController {
     private readonly chatMessageClassroomService: ChatMessageClassroomService,
   ) {}
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Get(':classroom_id')
   async getMessage(@Param() param, @Req() req) {
     return await this.chatMessageClassroomService.getMessages(

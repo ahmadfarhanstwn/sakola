@@ -141,6 +141,13 @@ export class AuthService {
     if (isRefreshTokenMatching) return user;
   }
 
+  async getUserFromAuthToken(token: string) {
+    const payload = this.jwtService.verify(token, {
+      secret: process.env.JWT_SECRET,
+    });
+    if (payload.userId) return this.getUser(payload.userId);
+  }
+
   async getCookiesForLogout() {
     return [
       'Authentication=; HttpOnly; Path=/; Max-Age=0',

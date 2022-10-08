@@ -3,10 +3,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { chatMessageClassroomEntity } from '../../entity/chat_message_classroom.entity';
 import { PostsService } from '../../../posts/service/posts/posts.service';
 import { DataSource, Repository } from 'typeorm';
-import { deleteMessageDto } from '../../dto/delete_message.dto';
+import { deleteMessageDto, sendMessageDto } from '../../dto/delete_message.dto';
 import { Socket } from 'socket.io';
 import { parse } from 'cookie';
 import { AuthService } from '../../../../auth/service/auth/auth.service';
+import { WsException } from '@nestjs/websockets';
 
 @Injectable()
 export class ChatMessageClassroomService {
@@ -21,17 +22,29 @@ export class ChatMessageClassroomService {
   async getUserFromSocket(socket: Socket) {
     const cookie = socket.handshake.headers.cookie;
     const { Authentication } = parse(cookie);
-    const user = await this;
+    const user = await this.authService.getUserFromAuthToken(Authentication);
+    if (!user) throw new WsException('Invalid credentials.');
+    return user;
   }
 
-  async createMessage(chat: chatMessageClassroomEntity): Promise<any> {
-    const user = this.postService.isUserJoined(chat.user_id, chat.classroom_id);
+  async createMessage(
+    userId: number,
+    sendMessageDto: sendMessageDto,
+  ): Promise<any> {
+    const user = this.postService.isUserJoined(
+      userId,
+      sendMessageDto.classroom_id,
+    );
     if (!user)
       return new HttpException(
         'You are unable to create chat in this classroom',
         HttpStatus.UNAUTHORIZED,
       );
-    return await this.chatRepository.save(chat);
+    return await this.chatRepository.save({
+      user_id: userId,
+      classroom_id: sendMessageDto.classroom_id,
+      message: sendMessageDto.message,
+    });
   }
 
   async getMessages(user_id: number, classroom_id: number): Promise<any> {
