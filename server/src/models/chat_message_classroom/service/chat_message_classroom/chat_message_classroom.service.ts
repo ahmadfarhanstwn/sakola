@@ -4,6 +4,9 @@ import { chatMessageClassroomEntity } from '../../entity/chat_message_classroom.
 import { PostsService } from '../../../posts/service/posts/posts.service';
 import { DataSource, Repository } from 'typeorm';
 import { deleteMessageDto } from '../../dto/delete_message.dto';
+import { Socket } from 'socket.io';
+import { parse } from 'cookie';
+import { AuthService } from '../../../../auth/service/auth/auth.service';
 
 @Injectable()
 export class ChatMessageClassroomService {
@@ -12,7 +15,14 @@ export class ChatMessageClassroomService {
     private chatRepository: Repository<chatMessageClassroomEntity>,
     private postService: PostsService,
     private dataSource: DataSource,
+    private authService: AuthService,
   ) {}
+
+  async getUserFromSocket(socket: Socket) {
+    const cookie = socket.handshake.headers.cookie;
+    const { Authentication } = parse(cookie);
+    const user = await this;
+  }
 
   async createMessage(chat: chatMessageClassroomEntity): Promise<any> {
     const user = this.postService.isUserJoined(chat.user_id, chat.classroom_id);

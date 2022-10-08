@@ -13,19 +13,19 @@ import {
   acceptRejectJoinDto,
   createClassroomDto,
 } from '../../dto/classroom.dto';
-import JwtRefreshGuard from '../../../../auth/jwt_refresh.guard';
+import JwtGuard from '../../../../auth/jwt.guard';
 
 @Controller('classroom')
 export class ClassroomController {
   constructor(private readonly classroomService: ClassroomService) {}
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Post('')
   async createClassroom(@Req() req, @Body() inputDto: createClassroomDto) {
     return await this.classroomService.createClassroom(inputDto, req.user.id);
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Post('join')
   async joinClassroom(@Req() req) {
     return await this.classroomService.joinClassroom(
@@ -34,7 +34,7 @@ export class ClassroomController {
     );
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Post('accept')
   async acceptWaiting(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.acceptJoin(
@@ -44,7 +44,7 @@ export class ClassroomController {
     );
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Post('reject')
   async rejectWaiting(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.rejectJoin(
@@ -54,7 +54,7 @@ export class ClassroomController {
     );
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Get(':id/waiting')
   async getWaitingList(@Param() param, @Req() req) {
     return await this.classroomService.getWaitingApprovals(
@@ -63,7 +63,7 @@ export class ClassroomController {
     );
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Delete('remove-member')
   async removeMember(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.removeMember(
@@ -73,7 +73,7 @@ export class ClassroomController {
     );
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Delete(':classroom_id')
   async deleteClassroom(@Req() req, @Param() param) {
     return await this.classroomService.deleteClassroom(
@@ -82,7 +82,7 @@ export class ClassroomController {
     );
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Get(':classroom_id/members')
   async getClassroomMembers(@Param() param, @Req() req) {
     return await this.classroomService.getClassroomMembers(

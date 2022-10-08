@@ -129,8 +129,11 @@ export class AuthService {
     return this.userRepository.findOne({ where: { id: id } });
   }
 
-  async getUserIfRefreshTokenMatched(refreshToken: string, userId: number) {
-    const user = await this.getUser(userId);
+  async getUserIfRefreshTokenMatched(refreshToken: string) {
+    const payload = this.jwtService.verify(refreshToken, {
+      secret: process.env.JWT_SECRET,
+    });
+    const user = await this.getUser(payload.userId);
     const isRefreshTokenMatching = await bcrypt.compare(
       refreshToken,
       user.currentHashedRefreshToken,

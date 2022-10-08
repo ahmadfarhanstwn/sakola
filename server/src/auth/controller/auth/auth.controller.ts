@@ -17,6 +17,7 @@ import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import JwtRefreshGuard from '../../jwt_refresh.guard';
 import { RequestWithUser } from '../../request_with_user.interface';
+import JwtGuard from '../../jwt.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -68,7 +69,7 @@ export class AuthController {
     return request.user;
   }
 
-  @UseGuards(JwtRefreshGuard)
+  @UseGuards(JwtGuard)
   @Post('logout')
   @HttpCode(200)
   async logout(@Req() request: RequestWithUser) {
