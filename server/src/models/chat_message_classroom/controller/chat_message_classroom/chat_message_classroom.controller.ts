@@ -12,7 +12,7 @@ export class ChatMessageClassroomController {
   @Get(':classroom_id')
   async getMessage(@Param() param, @Req() req) {
     return await this.chatMessageClassroomService.getMessages(
-      req.user.id,
+      req.user.userId,
       param.classroom_id,
     );
   }

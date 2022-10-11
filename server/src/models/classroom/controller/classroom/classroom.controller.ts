@@ -40,7 +40,6 @@ export class ClassroomController {
     return await this.classroomService.acceptJoin(
       inputDto.classroom_id,
       inputDto.joining_user_id,
-      req.user.id,
     );
   }
 
@@ -50,17 +49,13 @@ export class ClassroomController {
     return await this.classroomService.rejectJoin(
       inputDto.classroom_id,
       inputDto.joining_user_id,
-      req.user.id,
     );
   }
 
   @UseGuards(JwtGuard)
   @Get(':id/waiting')
   async getWaitingList(@Param() param, @Req() req) {
-    return await this.classroomService.getWaitingApprovals(
-      param.id,
-      req.user.id,
-    );
+    return await this.classroomService.getWaitingApprovals(param.id);
   }
 
   @UseGuards(JwtGuard)
@@ -69,17 +64,13 @@ export class ClassroomController {
     return await this.classroomService.removeMember(
       inputDto.classroom_id,
       inputDto.joining_user_id,
-      req.user.id,
     );
   }
 
   @UseGuards(JwtGuard)
   @Delete(':classroom_id')
   async deleteClassroom(@Req() req, @Param() param) {
-    return await this.classroomService.deleteClassroom(
-      param.classroom_id,
-      req.user.id,
-    );
+    return await this.classroomService.deleteClassroom(param.classroom_id);
   }
 
   @UseGuards(JwtGuard)

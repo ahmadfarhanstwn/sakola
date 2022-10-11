@@ -125,7 +125,7 @@ export class ClassroomService {
     }
   }
 
-  async IsTeacher(userId: number, classroomId: number): Promise<boolean> {
+  async IsTeacher(userId: number, classroomId: number): Promise<any> {
     const user = await this.dataSource
       .getRepository(ClassMembersEntity)
       .createQueryBuilder('class_members')
@@ -134,24 +134,18 @@ export class ClassroomService {
       })
       .andWhere('class_members.user_id = :user_id', { user_id: userId })
       .getOne();
-    if (!user) return false;
-    return user.role == ClassMemberRoleEnum.Teacher ? true : false;
+    if (!user)
+      throw new HttpException(
+        'You are not joined the classroom',
+        HttpStatus.UNAUTHORIZED,
+      );
+    if (user.role != ClassMemberRoleEnum.Teacher)
+      throw new HttpException('You are not teacher!', HttpStatus.UNAUTHORIZED);
   }
 
-  async acceptJoin(
-    classroomId: number,
-    joiningUserId: number,
-    userId: number,
-  ): Promise<any> {
+  async acceptJoin(classroomId: number, joiningUserId: number): Promise<any> {
     const queryRunner = await this.dataSource.createQueryRunner();
     try {
-      const isTeacher = await this.IsTeacher(userId, classroomId);
-      if (!isTeacher)
-        return new HttpException(
-          'Forbidden! You are unable to accept!',
-          HttpStatus.FORBIDDEN,
-        );
-
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
@@ -192,18 +186,7 @@ export class ClassroomService {
     }
   }
 
-  async rejectJoin(
-    classroomId: number,
-    joiningUserId: number,
-    userId: number,
-  ): Promise<any> {
-    const isTeacher = await this.IsTeacher(userId, classroomId);
-    if (!isTeacher)
-      return new HttpException(
-        'Forbidden! You are unable to reject!',
-        HttpStatus.FORBIDDEN,
-      );
-
+  async rejectJoin(classroomId: number, joiningUserId: number): Promise<any> {
     await this.dataSource
       .createQueryBuilder()
       .delete()
@@ -214,14 +197,7 @@ export class ClassroomService {
     return true;
   }
 
-  async getWaitingApprovals(classroomId: number, userId: number): Promise<any> {
-    const isTeacher = await this.IsTeacher(userId, classroomId);
-    if (!isTeacher)
-      return new HttpException(
-        'Forbidden! You are unable to get waiting approvals list!',
-        HttpStatus.FORBIDDEN,
-      );
-
+  async getWaitingApprovals(classroomId: number): Promise<any> {
     return await this.dataSource
       .getRepository(WaitingApprovalEntity)
       .createQueryBuilder('waiting_approval')
@@ -236,20 +212,9 @@ export class ClassroomService {
       .getMany();
   }
 
-  async removeMember(
-    classroomId: number,
-    memberUserId: number,
-    userId: number,
-  ): Promise<any> {
+  async removeMember(classroomId: number, memberUserId: number): Promise<any> {
     const queryRunner = await this.dataSource.createQueryRunner();
     try {
-      const isTeacher = await this.IsTeacher(userId, classroomId);
-      if (!isTeacher)
-        return new HttpException(
-          'Forbidden! You are unable to accept!',
-          HttpStatus.FORBIDDEN,
-        );
-
       await queryRunner.connect();
       await queryRunner.startTransaction();
 
@@ -277,16 +242,9 @@ export class ClassroomService {
     }
   }
 
-  async deleteClassroom(classroomId: number, userId: number): Promise<any> {
+  async deleteClassroom(classroomId: number): Promise<any> {
     const queryRunner = await this.dataSource.createQueryRunner();
     try {
-      const isTeacher = await this.IsTeacher(userId, classroomId);
-      if (!isTeacher)
-        return new HttpException(
-          'Forbidden! You are unable to accept!',
-          HttpStatus.FORBIDDEN,
-        );
-
       await queryRunner.connect();
       await queryRunner.startTransaction();
 

@@ -42,7 +42,7 @@ export class ChatMessageClassrooomGateway {
   }
 
   @SubscribeMessage('get_all_messages_classroom')
-  //@MessageBody('classroom_id') IS TEMPORARY
+  //@MessageBody('classroom_id') IS TEMPORARY??
   async getAllMessageClassroom(
     @ConnectedSocket() socket: Socket,
     @MessageBody('classroom_id') classroom_id: number,

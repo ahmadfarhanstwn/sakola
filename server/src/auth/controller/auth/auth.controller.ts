@@ -10,6 +10,7 @@ import {
   UseGuards,
   Req,
   HttpCode,
+  HttpException,
 } from '@nestjs/common';
 import { AuthService } from '../../service/auth/auth.service';
 import { UserEntity } from '../../../models/user/entity/user.entity';
@@ -43,8 +44,11 @@ export class AuthController {
     );
 
     await this.authService.setCurrentRefreshToken(refreshToken.token, user.id);
-    request.res.setHeader('Set-Cookie', [accessToken, refreshToken.cookie]);
-    return user;
+    request.res.setHeader('Set-Cookie', [
+      accessToken.cookie,
+      refreshToken.cookie,
+    ]);
+    return { user: user, accessToken: accessToken.token };
   }
 
   @Post('verify-account')
@@ -55,8 +59,8 @@ export class AuthController {
   @Get(':id')
   async getOne(@Response() res, @Param() param) {
     const user = await this.authService.getUser(param.id);
-    if (!user) return res.status(HttpStatus.NOT_FOUND).json({});
-    return res.status(HttpStatus.OK).json({ user });
+    if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
+    return user;
   }
 
   @UseGuards(JwtRefreshGuard)
@@ -65,7 +69,7 @@ export class AuthController {
     const accessTokenCookie = await this.authService.getCookieWithAccessToken(
       request.user.id,
     );
-    request.res.setHeader('Set-Cookie', accessTokenCookie);
+    request.res.setHeader('Set-Cookie', accessTokenCookie.cookie);
     return request.user;
   }
 

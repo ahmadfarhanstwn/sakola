@@ -30,18 +30,14 @@ export class PostsController {
 
   @UseGuards(JwtGuard)
   @Get(':classroom_id')
-  async getPosts(@Param() param, @Req() req) {
-    return await this.postService.getPosts(param.classroom_id, req.user.id);
+  async getPosts(@Param() param) {
+    return await this.postService.getPosts(param.classroom_id);
   }
 
   @UseGuards(JwtGuard)
   @Get(':classroom_id/:post_id')
-  async getPost(@Param() param, @Req() req) {
-    return await this.postService.getPost(
-      param.classroom_id,
-      req.user.id,
-      param.post_id,
-    );
+  async getPost(@Param() param) {
+    return await this.postService.getPost(param.post_id);
   }
 
   @UseGuards(JwtGuard)
@@ -52,8 +48,7 @@ export class PostsController {
     @Body() inputDto: updatePostDto,
   ) {
     return await this.postService.updatePost(
-      param.classroom_id,
-      req.user.id,
+      req.user.userId,
       param.post_id,
       inputDto.title,
       inputDto.body,
@@ -63,10 +58,6 @@ export class PostsController {
   @UseGuards(JwtGuard)
   @Delete(':classroom_id/:post_id')
   async deletePost(@Param() param, @Req() req) {
-    return await this.postService.deletePost(
-      param.classroom_id,
-      req.user.id,
-      param.post_id,
-    );
+    return await this.postService.deletePost(req.user.id, param.post_id);
   }
 }

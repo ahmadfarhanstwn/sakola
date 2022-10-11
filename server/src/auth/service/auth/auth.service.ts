@@ -51,7 +51,8 @@ export class AuthService {
       secret: process.env.JWT_SECRET,
       expiresIn: '900s',
     });
-    return `Authentication=${token}; HttpOnly; Path=/; Max-Age=900s`;
+    const cookie = `Authentication=${token}; HttpOnly; Path=/; Max-Age=900s`;
+    return { cookie, token };
   }
 
   async getCookieWithRefreshToken(userId: number) {
@@ -99,7 +100,7 @@ export class AuthService {
   }
 
   async getAccount(id: number): Promise<any> {
-    const user = this.userRepository.findOneBy({ id: id });
+    const user = await this.userRepository.findOneBy({ id: id });
     if (!user) return null;
     return user;
   }
