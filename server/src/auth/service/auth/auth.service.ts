@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { MailerService } from '@nestjs-modules/mailer';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { signupDto } from '../../dto/signup.dto';
+import { encodePassword } from '../../../util/bcrypt.util';
 
 @Injectable()
 export class AuthService {
@@ -73,10 +75,9 @@ export class AuthService {
     );
   }
 
-  async signUp(user: UserEntity): Promise<any> {
+  async signUp(user: signupDto): Promise<any> {
     try {
-      const salt = await bcrypt.genSalt();
-      const hashedPassword = await bcrypt.hash(user.password, salt);
+      const hashedPassword = await encodePassword(user.password);
       const reqBody = {
         full_name: user.full_name,
         email: user.email,

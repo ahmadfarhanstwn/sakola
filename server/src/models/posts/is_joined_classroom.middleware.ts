@@ -27,7 +27,7 @@ export class isJoinedClassroomMiddleware implements NestMiddleware {
     });
     const isJoinedClassroom = await this.postsService.isUserJoined(
       dataToken.userId,
-      req.body.classroom_id,
+      parseInt(req.params.classroom_id),
     );
     if (!isJoinedClassroom)
       throw new HttpException(

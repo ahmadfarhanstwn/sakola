@@ -7,6 +7,8 @@ import {
   Param,
   Body,
   Delete,
+  ParseUUIDPipe,
+  HttpStatus,
 } from '@nestjs/common';
 import { ClassroomService } from '../../service/classroom/classroom.service';
 import {
@@ -54,13 +56,19 @@ export class ClassroomController {
 
   @UseGuards(JwtGuard)
   @Get(':id/waiting')
-  async getWaitingList(@Param() param, @Req() req) {
-    return await this.classroomService.getWaitingApprovals(param.id);
+  async getWaitingList(
+    @Param(
+      'id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
+  ) {
+    return await this.classroomService.getWaitingApprovals(id);
   }
 
   @UseGuards(JwtGuard)
   @Delete('remove-member')
-  async removeMember(@Req() req, @Body() inputDto: acceptRejectJoinDto) {
+  async removeMember(@Body() inputDto: acceptRejectJoinDto) {
     return await this.classroomService.removeMember(
       inputDto.classroom_id,
       inputDto.joining_user_id,
@@ -69,15 +77,28 @@ export class ClassroomController {
 
   @UseGuards(JwtGuard)
   @Delete(':classroom_id')
-  async deleteClassroom(@Req() req, @Param() param) {
-    return await this.classroomService.deleteClassroom(param.classroom_id);
+  async deleteClassroom(
+    @Param(
+      'classroom_id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    classroom_id: number,
+  ) {
+    return await this.classroomService.deleteClassroom(classroom_id);
   }
 
   @UseGuards(JwtGuard)
   @Get(':classroom_id/members')
-  async getClassroomMembers(@Param() param, @Req() req) {
+  async getClassroomMembers(
+    @Param(
+      'classroom_id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    classroom_id: number,
+    @Req() req,
+  ) {
     return await this.classroomService.getClassroomMembers(
-      param.classroom_id,
+      classroom_id,
       req.user.id,
     );
   }

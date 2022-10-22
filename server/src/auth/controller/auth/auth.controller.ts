@@ -11,24 +11,21 @@ import {
   Req,
   HttpCode,
   HttpException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { AuthService } from '../../service/auth/auth.service';
-import { UserEntity } from '../../../models/user/entity/user.entity';
-import { JwtService } from '@nestjs/jwt';
 import { AuthGuard } from '@nestjs/passport';
 import JwtRefreshGuard from '../../jwt_refresh.guard';
 import { RequestWithUser } from '../../request_with_user.interface';
 import JwtGuard from '../../jwt.guard';
+import { signupDto } from '../../dto/signup.dto';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private jwtService: JwtService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
-  async signUp(@Body() user: UserEntity) {
+  async signUp(@Body() user: signupDto) {
     return await this.authService.signUp(user);
   }
 
@@ -57,8 +54,15 @@ export class AuthController {
   }
 
   @Get(':id')
-  async getOne(@Response() res, @Param() param) {
-    const user = await this.authService.getUser(param.id);
+  async getOne(
+    @Response() res,
+    @Param(
+      'id',
+      new ParseUUIDPipe({ errorHttpStatusCode: HttpStatus.NOT_ACCEPTABLE }),
+    )
+    id: number,
+  ) {
+    const user = await this.authService.getUser(id);
     if (!user) throw new HttpException('User not found', HttpStatus.NOT_FOUND);
     return user;
   }
