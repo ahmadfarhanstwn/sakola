@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "@types/joi": "^17.2.3",
+    "joi": "^17.6.3"
+  }
+}

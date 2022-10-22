@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsBoolean, IsUUID } from 'class-validator';
 import { PostSetting } from '../entity/classroom.entity';
+import Joi from 'joi';
 
 export class createClassroomDto {
   @IsString({ message: 'name field need to be string' })
@@ -15,6 +16,17 @@ export class createClassroomDto {
   post_settings: PostSetting;
 }
 
+export const createClassroomSchema = Joi.object({
+  name: Joi.string().required(),
+  description: Joi.string(),
+  join_approval: Joi.boolean().required(),
+  post_settings: Joi.string().valid(
+    'AllPostComment',
+    'StudentComment',
+    'OnlyTeacher',
+  ),
+});
+
 export class acceptRejectJoinDto {
   @IsUUID()
   @IsNotEmpty({ message: 'classroom_id field cannot be empty' })
@@ -24,3 +36,8 @@ export class acceptRejectJoinDto {
   @IsNotEmpty({ message: 'joining_user_id field cannot be empty' })
   joining_user_id: number;
 }
+
+export const acceptRejectJoinSchema = Joi.object({
+  classroom_id: Joi.number().required(),
+  joining_user_id: Joi.number().required(),
+});

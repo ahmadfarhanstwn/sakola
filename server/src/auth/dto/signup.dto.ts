@@ -1,4 +1,5 @@
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import Joi from 'joi';
 
 export class signupDto {
   @IsNotEmpty()
@@ -13,3 +14,9 @@ export class signupDto {
   @IsString()
   password: string;
 }
+
+export const signupSchema = Joi.object({
+  email: Joi.string().required(),
+  full_name: Joi.string().required(),
+  password: Joi.string().required(),
+});

@@ -12,19 +12,22 @@ import {
   HttpCode,
   HttpException,
   ParseUUIDPipe,
+  UsePipes,
 } from '@nestjs/common';
 import { AuthService } from '../../service/auth/auth.service';
 import { AuthGuard } from '@nestjs/passport';
 import JwtRefreshGuard from '../../jwt_refresh.guard';
 import { RequestWithUser } from '../../request_with_user.interface';
 import JwtGuard from '../../jwt.guard';
-import { signupDto } from '../../dto/signup.dto';
+import { signupDto, signupSchema } from '../../dto/signup.dto';
+import { JoiValidationPipe } from '../../../pipes/joi_validation.pipe';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup')
+  @UsePipes(new JoiValidationPipe(signupSchema))
   async signUp(@Body() user: signupDto) {
     return await this.authService.signUp(user);
   }

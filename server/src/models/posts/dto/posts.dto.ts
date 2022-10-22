@@ -1,4 +1,5 @@
 import { IsString, IsNotEmpty, IsUUID, MaxLength } from 'class-validator';
+import Joi from 'joi';
 
 export class createPostDto {
   @IsString({ message: 'Title must be type of string' })
@@ -15,6 +16,12 @@ export class createPostDto {
   classroom_id: number;
 }
 
+export const createPostSchema = Joi.object({
+  title: Joi.string().required(),
+  body: Joi.string().required(),
+  classroom_Id: Joi.number().required(),
+});
+
 export class updatePostDto {
   @IsString({ message: 'Title must be type of string' })
   @IsNotEmpty({ message: 'title field cannot be empty' })
@@ -25,3 +32,8 @@ export class updatePostDto {
   @IsNotEmpty({ message: 'body field cannot be empty' })
   body: string;
 }
+
+export const updatePostSchema = Joi.object({
+  title: Joi.string().required(),
+  body: Joi.string().required(),
+});
